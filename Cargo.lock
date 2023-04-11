@@ -74,7 +74,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "summer_of_our_disc_content"
+name = "soodc"
 version = "0.1.0"
 dependencies = [
  "sha2",
