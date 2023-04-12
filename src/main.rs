@@ -21,7 +21,6 @@ fn main() {
     //Doing the thing that this thing does.
     let hash: String = retrieve_hash(&hash).unwrap();
     let result;
-    //let result = git_sum_sha256_from_file(&file_path).unwrap();
     if verbose {
         println!("Sha256 hash supplied:");
         println!("{}", hash);
@@ -36,8 +35,6 @@ fn main() {
     } else {
         println!("They do not match");
     }
-    //Below, testing part
-    //test();
 }
 
 fn git_sum_sha256_from_file( input:&String ) -> Result<String, String> {
@@ -48,7 +45,6 @@ fn git_sum_sha256_from_file( input:&String ) -> Result<String, String> {
     let mut buffer = Vec::new();
     let _x = file.read_to_end(&mut buffer);
     let mut summer = Sha256::new();
-    //update method takes forever. Finalize and read_to_end are effectively instant.
     summer.update(&buffer);
     Ok(format!("{:x}", summer.finalize()))
 }
@@ -61,7 +57,6 @@ fn retrieve_hash(input:&String) -> Result<String, String> {
     };
     let output = match file.read_to_string(&mut file_string) {
         Ok(_) => file_string.split(' ').next().unwrap().to_string(),
-        //Ok(x) => hash.split_whitespace().collect()[0],
         Err(_) => panic!("Couldn't read hash file to string."),
     };
     Ok(output)
