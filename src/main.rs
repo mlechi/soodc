@@ -1,10 +1,11 @@
-use sha2::{Sha256, Digest};
+use sha2::{Sha224, Sha256, Sha384, Sha512, Digest};
 use std::{env, fs::File, io::Read};
 fn main() {
     let args:Vec<String> = env::args().collect();
     let mut hash :String = String::new();
     let mut file_path: String = String::new();
     let mut verbose: bool = false;
+    let mut summer: Sha = Sha::Sha256;
     //Parsing arguments
     if args.len() > 1 {
         for i in 0..args.len() {
@@ -14,6 +15,9 @@ fn main() {
                 //The file to be hashed
                 "-f" => file_path = args[i+1].clone(),
                 "-v" => verbose = true,
+                "-sha224" => summer = Sha::Sha224,
+                "-sha384" => summer = Sha::Sha384,
+                "-sha512" => summer = Sha::Sha512,
                 _ => (),
             }
         }
@@ -22,14 +26,15 @@ fn main() {
     let hash: String = retrieve_hash(&hash).unwrap();
     let result;
     if verbose {
-        println!("Sha256 hash supplied:");
+        println!("Hash supplied:");
         println!("{}", hash);
-        println!("Sha256 of the file you are checking:");
-        result = git_sum_sha256_from_file(&file_path).unwrap();
+        println!("Hash of the file you are checking:");
+        result = git_sum_from_file(&file_path, summer).unwrap();
         println!("{}", result);
     } else {
-        result = git_sum_sha256_from_file(&file_path).unwrap();
+        result = git_sum_from_file(&file_path, summer).unwrap();
     }
+    println!("");
     if hash == result {
         println!("They match");
     } else {
@@ -37,16 +42,40 @@ fn main() {
     }
 }
 
-fn git_sum_sha256_from_file( input:&String ) -> Result<String, String> {
+pub enum Sha {
+    Sha224,
+    Sha256,
+    Sha384,
+    Sha512,
+}
+
+fn git_sum_from_file( input:&String, summer: Sha) -> Result<String, String> {
     let mut file = match File::open(&input) {
         Ok(x) => x,
         Err(_) => panic!("Couldn't open file {input}"),
     };
     let mut buffer = Vec::new();
     let _x = file.read_to_end(&mut buffer);
-    let mut summer = Sha256::new();
-    summer.update(&buffer);
-    Ok(format!("{:x}", summer.finalize()))
+    //let mut summer = Sha256::new();
+    if let Sha::Sha224 = summer {
+        let mut sum = Sha224::new();
+        sum.update(&buffer);
+        Ok(format!("{:x}", sum.finalize()))
+    } else if let Sha::Sha256 = summer {
+        let mut sum = Sha256::new();
+        sum.update(&buffer);
+        Ok(format!("{:x}", sum.finalize()))
+    } else if let Sha::Sha384 = summer {
+        let mut sum = Sha384::new();
+        sum.update(&buffer);
+        Ok(format!("{:x}", sum.finalize()))
+    } else if let Sha::Sha512 = summer {
+        let mut sum = Sha512::new();
+        sum.update(&buffer);
+        Ok(format!("{:x}", sum.finalize()))
+    } else {
+        return Ok("".to_string())
+    }
 }
 
 fn retrieve_hash(input:&String) -> Result<String, String> {
@@ -70,5 +99,8 @@ fn help_message() {
     println!("");
     println!("-h: file containing the provided hash.");
     println!("-f: file to be checked.");
+    println!("");
+    println!("-sha224, -sha384, -sha512 to use these hashing algorithms as opposed to the default of sha256.");
+    println!("");
     println!("");
 }
