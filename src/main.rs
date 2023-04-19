@@ -36,8 +36,14 @@ fn main() {
     }
     println!("");
     if hash == result {
+        println!("Hash target: {hash}");
+        println!("Hash result: {result}");
+        println!("");
         println!("They match");
     } else {
+        println!("Hash target: {hash}");
+        println!("Hash result: {result}");
+        println!("");
         println!("They do not match");
     }
 }
